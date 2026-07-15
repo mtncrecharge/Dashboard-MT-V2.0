@@ -2249,15 +2249,13 @@ async function fetchCSV(url){
     } finally { clearTimeout(timer); }
   }
 
-  // Race: self-hosted Vercel proxy (paling reliable, no CORS, ada edge cache)
-  // dulu, lalu direct + public proxies sebagai fallback kalau /api/sheet-proxy
-  // belum di-deploy atau gagal.
+  // Race: direct fetch dulu (Google Sheets pub CSV support CORS langsung, paling cepat),
+  // lalu public proxy sebagai fallback kalau direct gagal (network/CORS berubah).
   const candidates = [
-    `/api/sheet-proxy?url=${encodeURIComponent(url)}`,
     url + bust,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    `https://thingproxy.freeboard.io/fetch/${url}`,
   ];
 
   try {
@@ -3425,12 +3423,6 @@ async function scheduleNotification(){
 ══════════════════════════════════════════ */
 const PB_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMWv2mD7Ji9EY5gAuC0tRquUY7qQGBT-rI4IpsU6JfrM-7XrLOom3Q4GTpt1dWYbEYEH146BWpPfxD/pub?gid=1068833881&single=true&output=csv';
 const PB_CACHE_KEY = 'pb_lock_csv_cache';
-const PROXIES = [
-  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-  u => u,
-];
 
 let allData = [], filtered = [];
 let sortKey = 'lock_n', sortDir = -1;
@@ -3465,11 +3457,10 @@ function fetchWithTimeout(url, ms) {
 
 async function pb_fastFetch(url) {
   const candidates = [
-    `/api/sheet-proxy?url=${encodeURIComponent(url)}`,
     url + '&t=' + Date.now(),
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    `https://thingproxy.freeboard.io/fetch/${url}`,
   ];
 
   const attempts = candidates.map(c =>
@@ -3984,11 +3975,10 @@ function pu_safePct(v){ if(!v||v.startsWith('#')) return '0%'; return String(v).
 // (fetchWithTimeout() sudah didefinisikan di bagian PB Lock dan dipakai bareng di sini)
 async function pu_fastFetch(url) {
   const candidates = [
-    `/api/sheet-proxy?url=${encodeURIComponent(url)}`,
     url + '&t=' + Date.now(),
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    `https://thingproxy.freeboard.io/fetch/${url}`,
   ];
 
   const attempts = candidates.map(c =>
