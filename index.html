@@ -2255,7 +2255,6 @@ async function fetchCSV(url){
     url + bust,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    `https://thingproxy.freeboard.io/fetch/${url}`,
   ];
 
   try {
@@ -2886,6 +2885,13 @@ const obs=new IntersectionObserver(entries=>{
 },{threshold:0.1});
 obs.observe(document.getElementById('map'));
 
+// ── Realtime tech markers on map ──
+let techWatchId = null;
+let realtimeInterval = null;
+let usingBGGeo = false; // Fix #4 — track which GPS mode aktif
+let techLayer = null;
+let isFetchingTech = false;
+
 // Start — restore session kalau ada
 setInterval(()=>{if(CURRENT_USER && isDispatchActive())loadData();},60*1000);
 (function restoreSession(){
@@ -2905,13 +2911,6 @@ setInterval(()=>{if(CURRENT_USER && isDispatchActive())loadData();},60*1000);
   } catch(e){ localStorage.removeItem('dispatch_session'); }
 })();
 
-// ── Realtime tech markers on map ──
-let techWatchId = null;
-let realtimeInterval = null;
-let usingBGGeo = false; // Fix #4 — track which GPS mode aktif
-
-let techLayer = null;
-let isFetchingTech = false;
 async function fetchTechLocations(){
   if(!CURRENT_USER || CURRENT_USER.role !== 'admin') return;
   if(isFetchingTech || isRenderingMap) return;
@@ -3460,7 +3459,6 @@ async function pb_fastFetch(url) {
     url + '&t=' + Date.now(),
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    `https://thingproxy.freeboard.io/fetch/${url}`,
   ];
 
   const attempts = candidates.map(c =>
@@ -3978,7 +3976,6 @@ async function pu_fastFetch(url) {
     url + '&t=' + Date.now(),
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    `https://thingproxy.freeboard.io/fetch/${url}`,
   ];
 
   const attempts = candidates.map(c =>
